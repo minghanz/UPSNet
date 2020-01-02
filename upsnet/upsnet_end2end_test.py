@@ -37,7 +37,7 @@ from lib.utils.logging import create_logger
 from lib.utils.timer import Timer
 
 
-args = parse_args()
+args = parse_args() # ZMH: the yaml file is injected to cfg here
 logger, final_output_path = create_logger(config.output_path, args.cfg, config.dataset.test_image_set)
 
 from upsnet.dataset import *
@@ -46,6 +46,9 @@ from upsnet.bbox.bbox_transform import bbox_transform, clip_boxes, expand_boxes
 from lib.utils.callback import Speedometer
 from lib.utils.data_parallel import DataParallel
 from pycocotools.mask import encode as mask_encode
+
+import warnings
+warnings.filterwarnings("ignore") # https://github.com/uber-research/UPSNet/issues/88
 
 cv2.ocl.setUseOpenCL(False)
 
@@ -244,8 +247,16 @@ def upsnet_test():
         if i_iter > 10:
             net_timer.tic()
         with torch.no_grad():
-            output = test_model(*batch)
+            print("batch:", len(batch))
+            print("batch:", type(*batch))
+            print("batch content:", type(batch[0]), type(batch[0][0]), type(batch[0][1]))
+            output = test_model(*batch)     #ZMH: here the * is to release the [] of batch (batch is a list of length 1, with the only item the tuple(data, None), where data is a dict )
             torch.cuda.synchronize()
+            print("output['panoptic_outputs']", output['panoptic_outputs'])
+            pano_ = torch.where(output['panoptic_outputs']==255, torch.zeros_like(output['panoptic_outputs']), output['panoptic_outputs'])
+            print(pano_.dtype, pano_.max(), pano_.min())
+            # for item in output:
+            #     print(item, 'shape:', output[item].shape, output[item].dtype)
             if i_iter > 10:
                 net_time = net_timer.toc()
             else:

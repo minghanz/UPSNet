@@ -329,7 +329,7 @@ class Cityscapes(BaseDataset):
                     )
                     ax.text(bbox[0], bbox[1] - 2, name + '{:0.2f}'.format(score).lstrip('0'), fontsize=5, family='serif',
                             bbox=dict(facecolor='g', alpha=0.4, pad=0, edgecolor='none'), color='white')
-                    _, contour, hier = cv2.findContours(mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+                    contour, hier = cv2.findContours(mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE) # https://github.com/facebookresearch/maskrcnn-benchmark/issues/339
                     color = (palette[name][0] / 255, palette[name][1] / 255, palette[name][2] / 255)
                     for c in contour:
                         ax.add_patch(

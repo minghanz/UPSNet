@@ -8,7 +8,7 @@ fi
 
 # Install essential python packages
 
-pip install pyyaml pycocotools
+# pip install pyyaml pycocotools
 
 # Download panopticapi devkit
 git clone https://github.com/cocodataset/panopticapi lib/dataset_devkit/panopticapi
