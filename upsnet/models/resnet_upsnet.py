@@ -43,8 +43,6 @@ class resnet_upsnet(resnet_rcnn):
         self.num_classes = config.dataset.num_classes
         self.num_seg_classes = config.dataset.num_seg_classes
         self.num_reg_classes = (2 if config.network.cls_agnostic_bbox_reg else config.dataset.num_classes)
-
-        print("resnet_upsnet.py", self.num_classes, self.num_seg_classes, self.num_reg_classes) # ZMH: 9 19 9
         # ZMH: num_classes: X_thing+1=9 (see SegTerm), num_seg_classes: X_stuff+X_thing=19
 
         # backbone net
@@ -245,17 +243,18 @@ class resnet_upsnet(resnet_rcnn):
                 panoptic_logits = torch.cat([seg_logits, (seg_inst_logits + mask_logits)], dim=1)
                 panoptic_output = torch.max(F.softmax(panoptic_logits, dim=1), dim=1)[1]
 
-            print("panoptic_logits", panoptic_logits.shape, panoptic_logits.dtype, panoptic_logits.max(), panoptic_logits.min())
-            print("seg_logits", seg_logits.shape, seg_logits.dtype, seg_logits.max(), seg_logits.min())
-            print("seg_inst_logits", seg_inst_logits.shape, seg_inst_logits.dtype, seg_inst_logits.max(), seg_inst_logits.min())
-            print("mask_logits", mask_logits.shape, mask_logits.dtype, mask_logits.max(), mask_logits.min())
-            print('-----------------------------')
+            # print("panoptic_logits", panoptic_logits.shape, panoptic_logits.dtype, panoptic_logits.max(), panoptic_logits.min())
+            # print("seg_logits", seg_logits.shape, seg_logits.dtype, seg_logits.max(), seg_logits.min())
+            # print("seg_inst_logits", seg_inst_logits.shape, seg_inst_logits.dtype, seg_inst_logits.max(), seg_inst_logits.min())
+            # print("mask_logits", mask_logits.shape, mask_logits.dtype, mask_logits.max(), mask_logits.min())
+            # print("all_seg_logits", fcn_output['fcn_output'].shape, fcn_output['fcn_output'].dtype, fcn_output['fcn_output'].max(), fcn_output['fcn_output'].min())
+            # print('-----------------------------')
             results.update({
                 'panoptic_outputs': panoptic_output,
             })
             ### ZMH: change to only output panoptic_logits for cvo depth learning
             # return results
-            return panoptic_logits
+            return panoptic_logits, fcn_output['fcn_output']
 
     def calc_panoptic_acc(self, panoptic_logits, gt):
         _, output_cls = torch.max(panoptic_logits.data, 1, keepdim=True)
